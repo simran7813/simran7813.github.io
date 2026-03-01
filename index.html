@@ -72,15 +72,45 @@
       position: fixed;
       pointer-events: none;
       opacity: 0;
-      font-size: 1rem;
       animation: floatPetal linear infinite;
       z-index: 0;
+      user-select: none;
     }
     @keyframes floatPetal {
-      0%   { transform: translateY(-20px) rotate(0deg); opacity: 0; }
-      10%  { opacity: 0.6; }
-      90%  { opacity: 0.3; }
-      100% { transform: translateY(110vh) rotate(360deg); opacity: 0; }
+      0%   { transform: translateY(-40px) rotate(0deg) scale(1); opacity: 0; }
+      8%   { opacity: 1; }
+      92%  { opacity: 0.5; }
+      100% { transform: translateY(110vh) rotate(360deg) scale(0.8); opacity: 0; }
+    }
+    .floater {
+      position: fixed;
+      pointer-events: none;
+      opacity: 0;
+      animation: floatDrift ease-in-out infinite;
+      z-index: 0;
+      user-select: none;
+    }
+    @keyframes floatDrift {
+      0%   { opacity: 0; transform: translateY(0) translateX(0) rotate(0deg) scale(1); }
+      10%  { opacity: 0.65; }
+      50%  { transform: translateY(-18px) translateX(12px) rotate(15deg) scale(1.05); }
+      90%  { opacity: 0.55; }
+      100% { opacity: 0; transform: translateY(0) translateX(0) rotate(0deg) scale(1); }
+    }
+    .floater-rise {
+      position: fixed;
+      pointer-events: none;
+      opacity: 0;
+      animation: floatRise linear infinite;
+      z-index: 0;
+      user-select: none;
+    }
+    @keyframes floatRise {
+      0%   { transform: translateY(100vh) translateX(0) rotate(0deg); opacity: 0; }
+      8%   { opacity: 0.55; }
+      50%  { transform: translateY(50vh) translateX(20px) rotate(180deg); opacity: 0.5; }
+      92%  { opacity: 0.3; }
+      100% { transform: translateY(-60px) translateX(-10px) rotate(360deg); opacity: 0; }
     }
 
     /* ---- HEADER ---- */
@@ -200,55 +230,6 @@
       transition: transform 0.25s ease, box-shadow 0.25s ease;
     }
     .card:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(201,132,154,0.12); }
-
-    /* ---- NOW PLAYING ---- */
-    #now-playing-card {
-      display: flex;
-      align-items: center;
-      gap: 1.5rem;
-      background: linear-gradient(135deg, rgba(247,214,224,0.5), rgba(232,213,245,0.5));
-      border-color: rgba(155,122,173,0.2);
-    }
-    .np-art {
-      width: 80px; height: 80px;
-      border-radius: 12px;
-      object-fit: cover;
-      flex-shrink: 0;
-      background: var(--lavender);
-    }
-    .np-art-placeholder {
-      width: 80px; height: 80px;
-      border-radius: 12px;
-      background: linear-gradient(135deg, var(--lavender), var(--blush));
-      flex-shrink: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.8rem;
-    }
-    .np-info { flex: 1; min-width: 0; }
-    .np-label {
-      font-size: 0.7rem;
-      font-weight: 500;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--mauve);
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
-      margin-bottom: 0.3rem;
-    }
-    .np-label .dot {
-      width: 6px; height: 6px;
-      border-radius: 50%;
-      background: var(--mauve);
-      animation: pulse 1.5s ease-in-out infinite;
-    }
-    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.8)} }
-    .np-track { font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .np-artist { font-size: 0.85rem; color: var(--text-light); margin-top: 0.15rem; }
-    .np-link { font-size: 0.75rem; color: var(--mauve); text-decoration: none; margin-top: 0.4rem; display: inline-block; }
-    .np-link:hover { text-decoration: underline; }
 
     /* ---- GRID LAYOUTS ---- */
     .grid-3 { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1rem; }
@@ -628,20 +609,6 @@
         <span class="section-pill" style="background:rgba(247,214,224,0.6);color:var(--dusty-rose);">last.fm</span>
       </div>
 
-      <!-- Now Playing -->
-      <div id="now-playing-wrapper" style="margin-bottom:1.2rem;">
-        <div class="card" id="now-playing-card">
-          <div class="np-art-placeholder">🎵</div>
-          <div class="np-info">
-            <div class="np-label"><span class="dot"></span> now playing</div>
-            <div class="np-track" id="np-track">Loading…</div>
-            <div class="np-artist" id="np-artist"></div>
-          </div>
-        </div>
-      </div>
-
-
-
       <div class="tabs">
         <button class="tab-btn" onclick="switchMusicTab('top-artists', this)">top artists</button>
         <button class="tab-btn active" onclick="switchMusicTab('top-albums', this)">top albums</button>
@@ -788,23 +755,77 @@
   });
 
   // ─────────────────────────────────────────────
-  //  PETALS
+  //  FLOATING BACKGROUND ELEMENTS
+  // ─────────────────────────────────────────────
+  const bg = document.getElementById('petals');
 
-  // ─────────────────────────────────────────────
-  //  PETALS
-  // ─────────────────────────────────────────────
-  const PETALS = ['🌸','✿','❀','🌷','✦','·'];
-  const petalContainer = document.getElementById('petals');
-  for (let i = 0; i < 18; i++) {
-    const p = document.createElement('div');
-    p.className = 'petal';
-    p.textContent = PETALS[Math.floor(Math.random() * PETALS.length)];
-    p.style.left = Math.random() * 100 + 'vw';
-    p.style.fontSize = (0.6 + Math.random() * 1) + 'rem';
-    p.style.animationDuration = (8 + Math.random() * 14) + 's';
-    p.style.animationDelay = (Math.random() * 12) + 's';
-    petalContainer.appendChild(p);
-  }
+  // Falling petals / glyphs (top → bottom)
+  const FALLING = [
+    { glyph: '🌸', size: [1.0, 1.8], count: 5 },
+    { glyph: '✿',  size: [0.8, 1.4], count: 4 },
+    { glyph: '✦',  size: [0.6, 1.1], count: 5 },
+    { glyph: '·',  size: [0.8, 1.2], count: 4 },
+    { glyph: '❀',  size: [0.9, 1.5], count: 3 },
+  ];
+
+  FALLING.forEach(({ glyph, size, count }) => {
+    for (let i = 0; i < count; i++) {
+      const el = document.createElement('div');
+      el.className = 'petal';
+      el.textContent = glyph;
+      el.style.left = Math.random() * 100 + 'vw';
+      el.style.fontSize = (size[0] + Math.random() * (size[1] - size[0])) + 'rem';
+      el.style.animationDuration = (10 + Math.random() * 16) + 's';
+      el.style.animationDelay = (Math.random() * 15) + 's';
+      bg.appendChild(el);
+    }
+  });
+
+  // Drifting ambient elements (float in place)
+  const DRIFTERS = [
+    { glyph: '🪐', size: [1.4, 2.2], count: 2, opacity: 0.25 },
+    { glyph: '🫧', size: [1.0, 1.8], count: 4, opacity: 0.35 },
+    { glyph: '🌙', size: [0.9, 1.4], count: 2, opacity: 0.3  },
+    { glyph: '⭐', size: [0.6, 1.0], count: 3, opacity: 0.25 },
+    { glyph: '✨', size: [0.8, 1.3], count: 3, opacity: 0.3  },
+    { glyph: '🌿', size: [1.0, 1.6], count: 2, opacity: 0.2  },
+    { glyph: '☁️', size: [1.4, 2.4], count: 3, opacity: 0.2  },
+  ];
+
+  DRIFTERS.forEach(({ glyph, size, count, opacity }) => {
+    for (let i = 0; i < count; i++) {
+      const el = document.createElement('div');
+      el.className = 'floater';
+      el.textContent = glyph;
+      el.style.left   = (5 + Math.random() * 90) + 'vw';
+      el.style.top    = (5 + Math.random() * 88) + 'vh';
+      el.style.fontSize = (size[0] + Math.random() * (size[1] - size[0])) + 'rem';
+      el.style.animationDuration = (6 + Math.random() * 10) + 's';
+      el.style.animationDelay   = (Math.random() * 8) + 's';
+      el.style.setProperty('--max-opacity', opacity);
+      bg.appendChild(el);
+    }
+  });
+
+  // Rising elements (bottom → top)
+  const RISING = [
+    { glyph: '🫧', size: [0.7, 1.2], count: 5 },
+    { glyph: '✧',  size: [0.5, 0.9], count: 4 },
+    { glyph: '˚',  size: [0.8, 1.1], count: 3 },
+  ];
+
+  RISING.forEach(({ glyph, size, count }) => {
+    for (let i = 0; i < count; i++) {
+      const el = document.createElement('div');
+      el.className = 'floater-rise';
+      el.textContent = glyph;
+      el.style.left = Math.random() * 100 + 'vw';
+      el.style.fontSize = (size[0] + Math.random() * (size[1] - size[0])) + 'rem';
+      el.style.animationDuration = (12 + Math.random() * 14) + 's';
+      el.style.animationDelay   = (Math.random() * 12) + 's';
+      bg.appendChild(el);
+    }
+  });
 
   // ─────────────────────────────────────────────
   //  CONFIG
@@ -976,34 +997,6 @@
     return res.json();
   }
 
-  async function loadNowPlaying(key) {
-    try {
-      const url = `https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user=${LASTFM_USER}&api_key=${key}&format=json&limit=1`;
-      const data = await fetch(url).then(r => r.json());
-      const track = data.recenttracks?.track?.[0];
-      if (!track) return;
-      const isPlaying = track['@attr']?.nowplaying === 'true';
-      const trackName = track.name;
-      const artistName = track.artist['#text'];
-      const img = track.image?.find(i => i.size === 'large')?.['#text'];
-      const npCard = document.getElementById('now-playing-card');
-      document.getElementById('np-track').textContent = trackName;
-      document.getElementById('np-artist').textContent = artistName;
-      npCard.querySelector('.np-label').innerHTML = isPlaying
-        ? `<span class="dot"></span> now playing`
-        : `<span style="width:6px;height:6px;border-radius:50%;background:var(--text-light);display:inline-block"></span> last played`;
-      if (img && !img.includes('2a96cbd8b46e442fc41c2b86b821562f')) {
-        npCard.querySelector('.np-art-placeholder, .np-art').outerHTML;
-        const imgEl = document.createElement('img');
-        imgEl.className = 'np-art';
-        imgEl.src = img;
-        imgEl.alt = trackName;
-        const placeholder = npCard.querySelector('.np-art-placeholder');
-        if (placeholder) placeholder.replaceWith(imgEl);
-      }
-    } catch(e) { /* skip */ }
-  }
-
   function artistCardHTML(artist) {
     const img = artist.image?.find(i => i.size === 'large')?.['#text'];
     const plays = parseInt(artist.playcount).toLocaleString();
@@ -1044,7 +1037,6 @@
 
   async function initLastfm() {
     const key = getLastfmKey();
-    loadNowPlaying(key);
 
     // Top artists
     try {
